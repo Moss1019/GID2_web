@@ -1,0 +1,17 @@
+
+.content {
+    height: 80vh;
+}
+
+.header {
+    height: 10vh;
+}
+
+.footer {
+    height: 10vh;
+}
+
+.list-item {
+    cursor: pointer;
+    
+}
