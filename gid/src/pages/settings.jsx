@@ -10,7 +10,7 @@ function Settings() {
                 currentRoute={UserRoutes.SETTINGS}
             />
 
-            SETTINGS PAGE
+            
             
             <Footer />
         </section>

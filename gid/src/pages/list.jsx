@@ -1,16 +1,24 @@
-import { Component, Fragment } from "react";
+import { Component } from "react";
+import { getLists } from "../services/rest";
 import { UserRoutes } from "../services/routes";
 import Footer from "../sections/footer";
 import Header from "../sections/header";
-import { getLists } from "../services/rest";
-
+import Lists from "../sections/lists";
+import Milestones from "../sections/milestones";
+import ModalContainer from "../controls/modalcontainer";
+import AddList from "../sections/addlist";
+import AddMilestone from "../sections/addmilestone";
 
 class List extends Component {
     constructor(props) {
         super(props);
         this.state = {
             lists: getLists(''),
-            selectedList: null
+            selectedList: null,
+            isAddingMilestone: false,
+            isAddingList: false,
+            newList: '',
+            newMilestone: ''
         }
     }
 
@@ -20,43 +28,37 @@ class List extends Component {
         })
     }
 
-    buildLists = () => {
-        return this.state.lists.map((l, i) => {
-            const completed = 100 * l.milestones.filter(m => m.done).length / l.milestones.length;
-            return (
-                <Fragment key={i}>
-                    <div className="row list-item" onClick={() => this.selectList(l)}>
-                        <div className="col-6">
-                            {l.name}
-                        </div>
-                        <div className="col-6">
-                            completed: {completed}%
-                        </div>
-                    </div>
-                </Fragment>
-            );
-        });
-    }
-
-    selectMileStone = (milestone) => {
+    selectMilestone = (milestone) => {
         console.log(milestone);
     }
 
-    buildMilestoneList = () => {
-        return this.state.selectedList == null ? 
-        (
-            <Fragment>
-                no item selected
-            </Fragment>
-        ) : 
-        this.state.selectedList.milestones.map((m, i) => {
-            return (
-                <Fragment key={i}>
-                    <div className="list-item" onClick={() => this.selectMileStone(m)}>
-                        {m.description}
-                    </div>
-                </Fragment>
-            );
+    addList = () => {
+        this.setState({
+            isAddingList: true,
+            newList: ''
+        })
+    }
+
+    addMilestone = () => {
+        if(this.state.selectedList == null) {
+            return;
+        }
+        this.setState({
+            isAddingMilestone: true,
+            newMilestone: ''
+        });
+    }
+
+    createMilestone = (newMilestone) => {
+        var lists = this.state.lists.filter(l => l.name != this.state.selectedList.name);
+        var milestones = [...this.state.selectedList.milestones].concat(newMilestone);
+        var newSelectedList = {...this.state.selectedList, milestones};
+        lists.push(newSelectedList);
+        console.log('NEW MILESTEON');
+        console.log(newMilestone);
+        this.setState({
+            lists,
+            selectedList: newSelectedList
         });
     }
 
@@ -68,21 +70,56 @@ class List extends Component {
                 />
 
                 <div className="container-fluid content">
-                    <div>
-                        {JSON.stringify(this.state.lists)}
-                    </div>
                     <div className="row">
                         <div className="col-6">
-                            <section>
-                                {this.buildLists()}
-                            </section>
+                            <div className="row">
+                                <div className="col-8">
+                                    lists
+                                </div>
+                                <div className="flex-right col-4">
+                                    <button className="btn" onClick={(ev) => this.addList()}>+</button>
+                                </div>
+                            </div>
+
+                            <Lists
+                                lists={this.state.lists}
+                                onListSelect={this.selectList}
+                            />
                         </div>
 
                         <div className="col-6">
-                            <section>
-                                {this.buildMilestoneList()}
-                            </section>
+                            <div className="row">
+                                <div className="col-8">
+                                    milestones
+                                </div>
+                                <div className="col-4 flex-right">
+                                    <button className="btn" onClick={(ev) => this.addMilestone()}>+</button>
+                                </div>
+                            </div>
+
+                            <Milestones
+                                selectedList={this.state.selectedList}
+                                onMilestoneSelect={this.selectMilestone}
+                            />
                         </div>
+
+                        {this.state.isAddingMilestone &&
+                            <ModalContainer onClose={() => this.setState({isAddingMilestone: false})}>
+                                <AddMilestone 
+
+                                    addMilestone={this.createMilestone}
+                                />
+                            </ModalContainer>
+                        }
+
+                        {this.state.isAddingList &&
+                            <ModalContainer onClose={() => this.setState({isAddingList: false})}>
+                                <AddList
+                                    
+                                    onAddListItem={(list) => this.setState({lists: this.state.lists.concat(list)})}
+                                />
+                            </ModalContainer>
+                        }
                     </div>
                 </div>
                 
