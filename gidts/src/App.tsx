@@ -7,18 +7,17 @@ import './styles/controls.css';
 
 import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-
-import ListsPage from './pages/listspage';
-import SettingsPage from './pages/settingspage';
-import NetworkPage from './pages/networkpage';
+import Lists from './pages/lists';
+import Settings from './pages/settings';
+import Network from './pages/network';
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <Route path="/settings" component={SettingsPage} />
-        <Route path="/network" component={NetworkPage} />
-        <Route path="/" exact component={ListsPage} />
+        <Route path="/" exact component={Lists}/>
+        <Route path="/settings" exact component={Settings}/>
+        <Route path="/network" exact component={Network}/>
       </Router>
     </div>
   );

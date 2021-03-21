@@ -1,9 +1,15 @@
-
-
 .header, .footer {
     height: 10vh;
+    background-color: #eee;
 }
 
-.content {
-    min-height: 80vh;
+.footer {
+  background-color: #3e51b5;
+  color: #fff;
 }
+
+.app-body {
+    min-height: 80vh;
+    background-color: #eee;
+}
+
