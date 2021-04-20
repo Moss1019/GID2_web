@@ -5,5 +5,5 @@ steps:
   - name: node
     entrypoint: npm
     args: ["run", "build"]
-  - name: "gcr.io/cloud-builders/gcloud"
+  - name: "eu.gcr.io/cloud-builders/gcloud"
     args: ["app", "deploy", "./build/app.yaml"]
