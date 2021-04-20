@@ -1,5 +1,4 @@
 runtime: nodejs12
-env: flex
 handlers:
 - url: /(.*\..+)$
   static_files: build/\1
