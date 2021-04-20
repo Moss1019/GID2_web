@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && pwd",
+    "build": "react-scripts build && cp ./app.yaml ./build/app.yaml",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
