@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const SERVER_END_POINT = 'https://gcptestapp-309608.ew.r.appspot.com';
-// const SERVER_END_POINT = 'http://localhost:8080';
 
 export function postItem(item: any, onSuccess: (data: any) => void, onError: (err: any) => void) {
 	const url = `${SERVER_END_POINT}/api/items`;
@@ -47,6 +46,17 @@ export function getAllItems(onSuccess: (data: any) => void, onError: (err: any) 
 		});
 };
 
+
+export function getOfUser(userId: string, onSuccess: (data: any) => void, onError: (err: any) => void) {
+	const url = `${SERVER_END_POINT}/api/items/${userId}`;
+	axios.get(url)
+		.then(result => {
+			onSuccess(result.data);
+		})
+		.catch(err => {
+			onError(err);
+		})
+}
 
 
 export function putItem(item: any, onSuccess: (data: any) => void, onError: (err: any) => void) {

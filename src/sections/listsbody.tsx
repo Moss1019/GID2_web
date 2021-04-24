@@ -1,14 +1,16 @@
 import { Item } from '../common/Item';
-import { getAllItems, postItem } from '../http/item';
 import AddIcon from '@material-ui/icons/Add';
 import ItemEdit from '../containers/itemedit';
-// import { Milestone } from '../common/Milestone';
+import { Milestone } from '../common/Milestone';
 import ItemDisplay from '../containers/itemdisplay';
 import Confirmation from '../containers/confirmation';
-import { useState, Fragment, useEffect } from 'react';
+import MilestoneEdit from '../containers/milestoneedit';
 import { Button, Grid, Typography } from '@material-ui/core';
 import MilestoneDisplay from '../containers/milestonedisplay';
-import { emptyItem } from '../common/defaults';
+import { useState, useEffect, Fragment, useMemo } from 'react';
+import { emptyItem, emptyMilestone } from '../common/defaults';
+import { deleteMilestone, postMilestone, putMilestone } from '../http/milestone';
+import { deleteItem, getAllItems, postItem, putItem } from '../http/item';
 
 function ListsBody() {
   const [items, setItems] = useState<Item[]>([]);
@@ -18,13 +20,24 @@ function ListsBody() {
   const [isEditingItem, setIsEditingItem] = useState<boolean>(false);
   const [isDeletingItem, setIsDeletingItem] = useState<boolean>(false);
 
-  // const [currentMilestone, setCurrentMilestone] = useState<Milestone>(emptyMilestone);
+  const [currentMilestone, setCurrentMilestone] = useState<Milestone>(emptyMilestone);
   const [isAddingMilestone, setIsAddingMilestone] = useState<boolean>(false);
   const [isEditingMilestone, setIsEditingMilestone] = useState<boolean>(false);
   const [isDeletingMilestone, setIsDeletingMilestone] = useState<boolean>(false);
 
+  const sortedItems = useMemo(() => {
+    return items.sort((i1: Item, i2: Item) => i1.itemId > i2.itemId ? 1 : -1);
+  }, [items, currentItem]);
+
+  const sortedMilestones = useMemo(() => {
+    if(currentItem.itemId === '') {
+      return [];
+    }
+    return currentItem.milestones.sort((m1: Milestone, m2: Milestone) => m1.milestoneId > m2.milestoneId ? 1 : -1);
+  }, [currentItem]);
+
   useEffect(() => {
-    getAllItems((data) => setItems(data), console.log);
+    getAllItems((data) => setItems(data), console.error);
   }, []);
 
   const onItemAddClick = () => {
@@ -33,12 +46,96 @@ function ListsBody() {
   }
 
   const onItemEditClick = (item: any) => {
-    // setCurrentItem(item);
+    setCurrentItem(item);
     setIsEditingItem(true);
   }
 
   const onItemDeleteClick = (item: any) => {
+    setCurrentItem(item);
     setIsDeletingItem(true);
+  }
+
+  const saveItem = (item: Item) => {
+    if(isAddingItem) {
+      postItem(item, (res) => setItems([...items, res]), console.error);
+    } else if (isEditingItem) {
+      putItem(item, () => setItems([...items.filter(i => i.itemId !== item.itemId), item]), console.error)
+    }
+    setCurrentItem(emptyItem);
+    closeDialogs();
+  }
+
+  const removeItem = () => {
+    deleteItem(currentItem.itemId, (res) => {
+      if(res) {
+        setItems(items.filter(i => i.itemId !== currentItem.itemId));
+      }
+    }, console.error);
+    closeDialogs();
+  }
+
+  const onMilestoneEditClick = (milestone: any) => {
+    setCurrentMilestone(milestone);
+    setIsEditingMilestone(true);
+  }
+
+  const onMilestoneDeleteClick = (milestone: any) => {
+    setCurrentMilestone(milestone);
+    setIsDeletingMilestone(true);
+  }
+
+  const onMilestoneAddClick = () => {
+    setCurrentMilestone({
+      ...emptyMilestone,
+      itemId: currentItem.itemId
+    });
+    setIsAddingMilestone(true);
+  }
+
+  const saveMilestone = (milestone: Milestone) => {
+    if(isAddingMilestone) {
+      postMilestone(milestone, (res) => {
+        const newCurrentItem = {
+          ...currentItem,
+          milestones: [...currentItem.milestones, res]
+        }
+        setCurrentItem(newCurrentItem);
+        setItems([
+          ...items.filter(i => i.itemId !== currentItem.itemId),
+          newCurrentItem
+        ]);
+      }, console.error);
+    } else if (isEditingMilestone) {
+      putMilestone(milestone, () => {
+        const newCurrentItem = {
+          ...currentItem,
+          milestones: [...currentItem.milestones.filter(m => m.milestoneId !== currentMilestone.milestoneId), milestone]
+        }
+        setCurrentItem(newCurrentItem);
+        setItems([
+          ...items.filter(i => i.itemId !== currentItem.itemId),
+          newCurrentItem
+        ]);
+      }, console.error);
+    }
+    closeDialogs();
+  }
+
+  const removeMilestone = () => {
+    deleteMilestone(currentMilestone.milestoneId, (res) => {
+      if(res) {
+        const newCurrentItem = {
+          ...currentItem,
+          milestones: [...currentItem.milestones.filter(m => m.milestoneId !== currentMilestone.milestoneId)]
+        }
+        setCurrentItem(newCurrentItem);
+        setItems([
+          ...items.filter(i => i.itemId !== currentItem.itemId),
+          newCurrentItem
+        ]);
+      }
+    }, console.error);
+    closeDialogs();
   }
 
   const closeDialogs = () => {
@@ -50,53 +147,38 @@ function ListsBody() {
     setIsDeletingMilestone(false);
   }
 
-  const saveItem = (item: Item) => {
-    postItem(item, console.log, console.error);
-  }
-
-  const onMilestoneEditClick = (milestone: any) => {
-    // setCurrentMilestone(milestone);
-    setIsEditingMilestone(true);
-  }
-
-  const onMilestoneDeleteClick = (milestone: any) => {
-    setIsDeletingMilestone(true);
-  }
-
-  const onMilestoneAddClick = () => {
-    // setCurrentMilestone(emptyMilestone);
-    setIsAddingMilestone(true);
-  }
-
   return (
     <section className="app-body container-fluid">
       <Grid container>
         <Grid item xs={6} className="prd-2">
-          <Typography className="justify-center align-center">List items </Typography>
+          <Typography className="justify-center align-center">List items</Typography>
           <Button onClick={onItemAddClick}>
             <AddIcon />
           </Button>
           <ItemDisplay
-            items={items}
-            // onItemClick={setCurrentItem}
-            onItemClick={console.log}
-            onEditClick={onItemEditClick}
-            onDeleteClick={onItemDeleteClick}
+            items={sortedItems}
+            onItemClick={setCurrentItem}
+            onEdit={onItemEditClick}
+            onDelete={onItemDeleteClick}
           />
         </Grid>
 
         <Grid item xs={6} className="pld-2">
-          {/* {currentItem !== undefined &&
+          {currentItem.itemId !== '' &&
           <Fragment>
             <Typography className="justify-center">Milestones for {currentItem.title}</Typography>
-            <Button onClick={onMilestoneAddClick}></Button>
+            <Button onClick={onMilestoneAddClick}>
+              <AddIcon />
+            </Button>
             <MilestoneDisplay
-              milestones={currentItem.milestones}
+              milestones={sortedMilestones}
               onMilestoneClick={setCurrentMilestone}
+              onEdit={onMilestoneEditClick}
+              onDelete={onMilestoneDeleteClick}
             />
-          </Fragment>} */}
+          </Fragment>}
 
-          {currentItem === undefined &&
+          {currentItem.itemId === '' &&
           <Typography className="justify-center">
             No item selected
           </Typography>}
@@ -106,23 +188,30 @@ function ListsBody() {
       <ItemEdit
         item={currentItem}
         isOpen={isEditingItem || isAddingItem}
+        onComplete={console.log}
         onSave={saveItem}
         onClose={closeDialogs}
       />
       <Confirmation
+        message="Are you sure?"
         isOpen={isDeletingItem}
-        onCloseClick={closeDialogs}
+        onAccept={() => removeItem()}
+        onClose={closeDialogs}
       />
 
-      {/* <MilestoneEdit
+      <MilestoneEdit
         milestone={currentMilestone}
         isOpen={isEditingMilestone || isAddingMilestone}
+        onComplete={console.log}
         onSave={saveMilestone}
         onClose={closeDialogs}
       />
       <Confirmation
+        message="Are you sure?"
         isOpen={isDeletingMilestone}
-      /> */}
+        onAccept={() => removeMilestone()}
+        onClose={closeDialogs}
+      />
     </section>
   );
 }

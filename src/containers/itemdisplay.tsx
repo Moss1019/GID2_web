@@ -1,21 +1,24 @@
-import Edit from '@material-ui/icons/Edit';
+import EditIcon from '@material-ui/icons/Edit';
 import DeleteForever from '@material-ui/icons/DeleteForever';
 import { Card, CardContent, Grid, Button, Typography } from '@material-ui/core';
+import { formatDateSimple } from '../util/dateUtil';
+import { Item } from '../common/Item';
+import { Milestone } from '../common/Milestone';
 
 export interface ItemDisplayProps {
-  items: any[],
-  onItemClick: (item: any) => void
-  onEditClick: (item: any) => void
-  onDeleteClick: (item: any) => void
+  items: Item[];
+  onItemClick: (item: Item) => void;
+  onEdit: (item: Item) => void;
+  onDelete: (item: Item) => void;
 }
 
-function ItemDisplay({items, onItemClick, onEditClick, onDeleteClick}: ItemDisplayProps) {
-  const cards = items.map((i: any) => {
-    const hasMilestones = false;//i.milestones.length > 0;
-    const completed = [];//i.milestones.filter((m: any) => m.isCompleted);
+function ItemDisplay({items, onItemClick, onEdit, onDelete}: ItemDisplayProps) {
+  const cards = items.map((i: Item) => {
+    const hasMilestones = i.milestones.length > 0;
+    const completed = i.milestones.filter((m: Milestone) => m.isCompleted);
     const isCompleted = hasMilestones ?
-      completed.length === 0 : //i.milestones.length :
-      false;//i.isCompleted;
+      completed.length === i.milestones.length :
+      i.isCompleted;
     const percentage = isCompleted ? 100 :
       hasMilestones ? completed.length / i.milestones.length * 1.0 : 0;
     return (
@@ -24,7 +27,7 @@ function ItemDisplay({items, onItemClick, onEditClick, onDeleteClick}: ItemDispl
           <Grid container>
             <Grid item md={4} xs={6} className="pointer" onClick={() => onItemClick(i)}>
               <Typography variant="h5">{i.title}</Typography>
-              <Typography variant="h6">2020-01-01</Typography>
+              <Typography variant="h6">{formatDateSimple(i.dateCreated)}</Typography>
             </Grid>
 
             <Grid item md={4} xs={6} className="pointer" onClick={() => onItemClick(i)}>
@@ -35,12 +38,12 @@ function ItemDisplay({items, onItemClick, onEditClick, onDeleteClick}: ItemDispl
 
             <Grid item md={4} xs={12}>
               <div className="flex-right align-center">
-                <Button onClick={() => onEditClick(i)}>
-                  <Edit />
+                <Button onClick={() => onEdit(i)}>
+                  <EditIcon />
                 </Button>
               </div>
               <div className="flex-right align-center">
-                <Button onClick={() => onDeleteClick(i)}>
+                <Button onClick={() => onDelete(i)}>
                   <DeleteForever />
                 </Button>
               </div>

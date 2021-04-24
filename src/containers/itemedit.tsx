@@ -1,5 +1,5 @@
 import { Item } from '../common/Item';
-import Check from '@material-ui/icons/Check';
+import CheckIcon from '@material-ui/icons/Check';
 import { Fragment, useState, useEffect } from 'react';
 import { Modal, Paper, TextField, Typography, Button, Grid } from '@material-ui/core';
 
@@ -7,10 +7,11 @@ export interface ItemEditProps {
   item: Item;
   isOpen: boolean;
   onSave: (item: Item) => void;
+  onComplete: (item: Item) => void;
   onClose: (isOpen: boolean) => void;
 }
 
-function ItemEdit({item, isOpen, onSave, onClose}: ItemEditProps) {
+function ItemEdit({item, isOpen, onSave, onComplete, onClose}: ItemEditProps) {
   const [title, setTitle] = useState<string>('');
 
   const [errors, setErrors] = useState<any>({}); 
@@ -20,26 +21,22 @@ function ItemEdit({item, isOpen, onSave, onClose}: ItemEditProps) {
   }, [item]);
 
   const onCompleteClick = () => {
-    
+    onComplete(item);
   };
 
   const onSaveClick = () => {
-    let hasError = false;
-    const e: any = {};
     if(title.length === 0) {
-      e.title = 'please enter a title';
-      hasError = true;
-    }
-    if(hasError) {
-      setErrors(e);
+      setErrors({
+        ...errors,
+        title: 'Please enter a title'
+      });
       return;
     }
-    const item: Item = {
-      itemId: '',
+    const newItem: Item = {
+      ...item,
       title: title,
     };
-    onSave(item);
-    onClose(false);
+    onSave(newItem);
   }
 
   return (
@@ -60,7 +57,7 @@ function ItemEdit({item, isOpen, onSave, onClose}: ItemEditProps) {
             <span>{errors.title}</span>
           </Fragment>}
 
-          {/* {item !== undefined && item.milestones.length === 0 && !item.isCompleted &&
+          {item.itemId !== '' && item.milestones.length === 0 && !item.isCompleted &&
           <Fragment>
             <Grid container>
               <Grid item xs={8} className="align-center">
@@ -68,11 +65,11 @@ function ItemEdit({item, isOpen, onSave, onClose}: ItemEditProps) {
               </Grid>
               <Grid item xs={4}>
                 <Button onClick={() => onCompleteClick()}>
-                  <Check />
+                  <CheckIcon />
                 </Button>
               </Grid>
             </Grid>
-          </Fragment>} */}
+          </Fragment>}
           
           <div className="flex-right">
             <Button onClick={() => onSaveClick()}>
