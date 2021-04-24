@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const SERVER_END_POINT = 'https://gcptestapp-309608.ew.r.appspot.com/';
+// const SERVER_END_POINT = 'https://gcptestapp-309608.ew.r.appspot.com';
+const SERVER_END_POINT = 'http://localhost:8080';
 
 export function postItem(item: any, onSuccess: (data: any) => void, onError: (err: any) => void) {
 	const url = `${SERVER_END_POINT}/api/items`;
