@@ -9,10 +9,14 @@ import { Button, Grid, Typography } from '@material-ui/core';
 import MilestoneDisplay from '../containers/milestonedisplay';
 import { useState, useEffect, Fragment, useMemo } from 'react';
 import { emptyItem, emptyMilestone } from '../common/defaults';
+import { deleteItem, getItemsOfUser, postItem, putItem } from '../http/item';
 import { deleteMilestone, postMilestone, putMilestone } from '../http/milestone';
-import { deleteItem, getAllItems, postItem, putItem } from '../http/item';
 
-function ListsBody() {
+export interface ListsBodyProps {
+  userId: string;
+}
+
+function ListsBody({userId}: ListsBodyProps) {
   const [items, setItems] = useState<Item[]>([]);
 
   const [currentItem, setCurrentItem] = useState<Item>(emptyItem);
@@ -37,7 +41,7 @@ function ListsBody() {
   }, [currentItem]);
 
   useEffect(() => {
-    getAllItems((data) => setItems(data), console.error);
+    getItemsOfUser(userId, (data) => setItems(data), console.error);
   }, []);
 
   const onItemAddClick = () => {
@@ -57,7 +61,11 @@ function ListsBody() {
 
   const saveItem = (item: Item) => {
     if(isAddingItem) {
-      postItem(item, (res) => setItems([...items, res]), console.error);
+      const newItem = {
+        ...item,
+        userId: userId
+      }
+      postItem(newItem, (res) => setItems([...items, res]), console.error);
     } else if (isEditingItem) {
       putItem(item, () => setItems([...items.filter(i => i.itemId !== item.itemId), item]), console.error)
     }
@@ -71,12 +79,26 @@ function ListsBody() {
         setItems(items.filter(i => i.itemId !== currentItem.itemId));
       }
     }, console.error);
+    setCurrentItem(emptyItem);
+    closeDialogs();
+  }
+
+  const completeItem = (item: Item) => {
+    const newItem = {
+      ...item,
+      isCompleted: true
+    };
+    putItem(newItem, (res) => {
+      if(res) {
+        setItems([...items.filter(i => i.itemId !== item.itemId), newItem]);
+      }
+    }, console.error);
     closeDialogs();
   }
 
   const onMilestoneEditClick = (milestone: any) => {
-    setCurrentMilestone(milestone);
     setIsEditingMilestone(true);
+    setCurrentMilestone(milestone);
   }
 
   const onMilestoneDeleteClick = (milestone: any) => {
@@ -138,6 +160,24 @@ function ListsBody() {
     closeDialogs();
   }
 
+  const completeMilestone = (milestone: Milestone) => {
+    const newMilestone = {
+      ...milestone,
+      isCompleted: true
+    };
+    putMilestone(newMilestone, (res) => {
+      if(res) {
+        const newCurrentItem = {
+          ...currentItem,
+          milestones: [...currentItem.milestones.filter(m => m.milestoneId !== milestone.milestoneId), newMilestone]
+        };
+        setCurrentItem(newCurrentItem);
+        setItems([...items.filter(i => i.itemId !== currentItem.itemId), newCurrentItem]);
+      }
+    }, console.error);
+    closeDialogs();
+  }
+
   const closeDialogs = () => {
     setIsAddingItem(false);
     setIsEditingItem(false);
@@ -188,7 +228,7 @@ function ListsBody() {
       <ItemEdit
         item={currentItem}
         isOpen={isEditingItem || isAddingItem}
-        onComplete={console.log}
+        onComplete={completeItem}
         onSave={saveItem}
         onClose={closeDialogs}
       />
@@ -202,7 +242,7 @@ function ListsBody() {
       <MilestoneEdit
         milestone={currentMilestone}
         isOpen={isEditingMilestone || isAddingMilestone}
-        onComplete={console.log}
+        onComplete={completeMilestone}
         onSave={saveMilestone}
         onClose={closeDialogs}
       />

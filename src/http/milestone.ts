@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const SERVER_END_POINT = 'https://gcptestapp-309608.ew.r.appspot.com';
+const SERVER_END_POINT = 'http://localhost:8080';
 
 export function postMilestone(milestone: any, onSuccess: (data: any) => void, onError: (err: any) => void) {
 	const url = `${SERVER_END_POINT}/api/milestones`;
@@ -47,8 +47,8 @@ export function getAllMilestones(onSuccess: (data: any) => void, onError: (err: 
 };
 
 
-export function getOfItem(itemId: string, onSuccess: (data: any) => void, onError: (err: any) => void) {
-	const url = `${SERVER_END_POINT}/api/milestones/${itemId}`;
+export function getMilestonesOfItem(itemId: string, onSuccess: (data: any) => void, onError: (err: any) => void) {
+	const url = `${SERVER_END_POINT}/api/milestones/forItem/${itemId}`;
 	axios.get(url)
 		.then(result => {
 			onSuccess(result.data);
@@ -61,7 +61,7 @@ export function getOfItem(itemId: string, onSuccess: (data: any) => void, onErro
 
 export function putMilestone(milestone: any, onSuccess: (data: any) => void, onError: (err: any) => void) {
 	const url = `${SERVER_END_POINT}/api/milestones`;
-	return axios.put(url, milestone)
+	axios.put(url, milestone)
 		.then(result => {
 			onSuccess(result.data);
 		})

@@ -17,7 +17,8 @@ function ItemEdit({item, isOpen, onSave, onComplete, onClose}: ItemEditProps) {
   const [errors, setErrors] = useState<any>({}); 
 
   useEffect(() => {
-    setTitle(item?.title || '');
+    setTitle(item.title);
+    setErrors({});
   }, [item]);
 
   const onCompleteClick = () => {

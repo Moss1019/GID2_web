@@ -36,6 +36,10 @@
   height: 100%;
 }
 
+.w-100 {
+  width: 100%;
+}
+
 @media(min-width: 600px) {
   .prd-2 {
     padding-right: .5rem;
@@ -43,5 +47,11 @@
 
   .pld-2 {
     padding-left: .5rem;
+  }
+}
+
+@media (min-width: 600px) {
+  .wd-50vw {
+    width: 50vw;
   }
 }

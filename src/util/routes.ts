@@ -20,4 +20,15 @@ const routes: RouteInfo[] = [
   }
 ];
 
+const loginRegRoutes: RouteInfo[] = [
+  {
+    display: 'login',
+    path: '/login'
+  },
+  {
+    display: 'register',
+    path: '/register'
+  }
+];
+
 export default routes;

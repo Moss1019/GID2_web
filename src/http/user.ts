@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const SERVER_END_POINT = 'https://gcptestapp-309608.ew.r.appspot.com';
+const SERVER_END_POINT = 'http://localhost:8080';
 
 export function postUser(user: any, onSuccess: (data: any) => void, onError: (err: any) => void) {
 	const url = `${SERVER_END_POINT}/api/users`;
@@ -48,7 +48,7 @@ export function getAllUsers(onSuccess: (data: any) => void, onError: (err: any) 
 
 export function getUserByUserName(userName: string, onSuccess: (data: any) => void, onError: (err: any) => any) {
 	const url = `${SERVER_END_POINT}/api/users/byUserName/${userName}`;
-	return axios.get(url)
+	axios.get(url)
 		.then(result => {
 			onSuccess(result.data);
 		})
@@ -60,7 +60,7 @@ export function getUserByUserName(userName: string, onSuccess: (data: any) => vo
 
 export function putUser(user: any, onSuccess: (data: any) => void, onError: (err: any) => void) {
 	const url = `${SERVER_END_POINT}/api/users`;
-	return axios.put(url, user)
+	axios.put(url, user)
 		.then(result => {
 			onSuccess(result.data);
 		})

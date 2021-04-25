@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Milestone } from "../common/Milestone";
 import CheckIcon from "@material-ui/icons/Check";
 import { Button, Grid, Modal, Paper, TextField, Typography } from "@material-ui/core";
@@ -12,8 +12,13 @@ export interface MilestoneEditProp {
 }
 
 function MilestoneEdit({milestone, isOpen, onSave, onComplete, onClose}: MilestoneEditProp) {
-  const [description, setDescription] = useState<string>(milestone.description);
+  const [description, setDescription] = useState<string>('');
   const [errors, setErrors] = useState<any>({});
+
+  useEffect(() => {
+    setDescription(milestone.description);
+    setErrors({});
+  }, [milestone])
 
   const onSaveClick = () => {
     if(description.length === 0) {
